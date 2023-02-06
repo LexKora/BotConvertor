@@ -1,5 +1,8 @@
 import telebot
-from conf import TOKEN, KEYS
+import requests
+import json
+
+from conf import TOKEN, KEYS, HEADERS
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -20,4 +23,12 @@ def _list(message: telebot.types.Message):
     bot.send_message(message.chat.id, txt)
 
 
-bot.polling()
+@bot.message_handler(content_types=['text', ])
+def _list(message: telebot.types.Message):
+    val1, val2, amount = message.text.split(' ')
+    url = f'https://api.apilayer.com/currency_data/convert?to={KEYS[val1]}&from={KEYS[val2]}&amount={amount}'
+    r = requests.get(url, headers=HEADERS)
+    txt = json.loads(r.content)['result']
+    bot.send_message(message.chat.id, txt)
+
+bot.polling(none_stop=True)
