@@ -1,6 +1,6 @@
 import telebot
 
-from extensions import Requst
+from extensions import Requst, APIException
 from conf import TOKEN, KEYS, HEADERS
 
 bot = telebot.TeleBot(TOKEN)
@@ -24,11 +24,17 @@ def _list(message: telebot.types.Message):
 
 @bot.message_handler(content_types=['text', ])
 def _list(message: telebot.types.Message):
-    result = Requst.get_price(message.text.split(' '))
-    if result:
-        base, quote, amount = message.text.split(' ')
-        txt = f'{amount} {base} {result} {quote}'
-        bot.send_message(message.chat.id, txt)
+    _message = message.text.split(' ')
+    try:
+        result = Requst.get_price(_message)
 
+    except APIException as e:
+        bot.reply_to(message, f'Ошибка пользователя. \n{e}')
+    except Exception as e:
+        bot.reply_to(message, f'Ошибка сервера. \n{e}')
+    else:
+        base, quote, amount = _message
+        txt = f'{amount} {base} {result} {quote}'
+        bot.reply_to(message.chat.id, txt)
 
 bot.polling(none_stop=True)
