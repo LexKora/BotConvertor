@@ -2,7 +2,7 @@ import requests
 import json
 
 
-from conf import KEYS, HEADERS
+from conf import KEYS, HEADERS, SPELLING
 
 
 class APIException(Exception):
@@ -38,8 +38,18 @@ class Requst():
         try:
             result = json.loads(r.content)['result']
         except ValueError:
-            print('Ошибка запроса. Закончился доступ к сайту...')
+            print('Ошибка запроса. Отсутствует доступ к сайту...')
 
         return result
 
+
+def _spelling(val, num):
+    if 5 <= num <= 20:
+        return SPELLING[val][0]
+    elif num % 10 == 1:
+        return SPELLING[val][1]
+    elif num % 10 in (2, 3, 4):
+        return SPELLING[val][2]
+    else:
+        return SPELLING[val][0]
 
